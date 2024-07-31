@@ -23,8 +23,8 @@ void setNodeValue(CIntegerPtr nodePtr, int value, const string &nodeName) {
 }
 
 int main(int argc, char **argv) {
-    string carId = "BUG-0604"; // 車牌號碼
-    string key = "69553174"; // 金鑰
+    string vehicleId = "BUG-0604"; // 車牌號碼
+    string token = "69553174"; // 金鑰
 
     int cameraWidth = 2300; // 相機解析度w
     int cameraHeight = 1800;
@@ -32,10 +32,10 @@ int main(int argc, char **argv) {
     int windowWidth = 800; 
     int windowHeight = 600;
 
-    WebSocketClient ws_client(carId, key);
+    WebSocketClient ws_client(vehicleId, token);
 
     thread client_thread([&]() {
-        ws_client.run("ws://localhost:3002");
+        ws_client.run("ws://localhost:3002/AIvehicles?Id=" + vehicleId);
     });
 
     QApplication app(argc, argv);

@@ -88,6 +88,8 @@
     "qwidget": "cpp",
     "qkeyevent": "cpp",
     "qevent": "cpp",
-    "qdesktopwidget": "cpp"
+    "qdesktopwidget": "cpp",
+    "coroutine": "cpp",
+    "source_location": "cpp"
   }
 }

@@ -1,7 +1,8 @@
 #include "WebSocketClient.h"
 #include <iostream>
+#include <string>
 
-WebSocketClient::WebSocketClient(const std::string &carId, const std::string &key) : carId(carId), key(key) {
+WebSocketClient::WebSocketClient(const std::string &vehicleId, const std::string &token) : vehicleId(vehicleId), token(token) {
   c.init_asio();
 
   // Disable logging
@@ -21,7 +22,9 @@ void WebSocketClient::on_open(connection_hdl hdl) {
   connection = hdl;
   open = true;
 
-  c.send(connection, carId, websocketpp::frame::opcode::text);
+  std::string authMessage = "{\"vehicleId\":\"" + vehicleId + "\",\"token\":\"" + token + "\"}";
+  c.send(connection, authMessage, websocketpp::frame::opcode::text);
+  std::cout << "Sent auth message: " << authMessage << std::endl;
 }
 
 void WebSocketClient::on_close(connection_hdl hdl) {

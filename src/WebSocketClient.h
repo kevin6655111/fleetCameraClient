@@ -11,7 +11,7 @@ typedef websocketpp::client<websocketpp::config::asio_client> client;
 
 class WebSocketClient {
   public:
-    WebSocketClient(const std::string &carId, const std::string &key);
+    WebSocketClient(const std::string &vehicleId, const std::string &token);
     void on_message(connection_hdl, client::message_ptr msg);
     void on_open(connection_hdl hdl);
     void on_close(connection_hdl hdl);
@@ -22,8 +22,8 @@ class WebSocketClient {
     client c;
     connection_hdl connection;
     bool open = false;
-    std::string carId;
-    std::string key;
+    std::string vehicleId;
+    std::string token;
 };
 
 #endif // WEBSOCKETCLIENT_H
