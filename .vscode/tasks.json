@@ -1,0 +1,57 @@
+{
+  "tasks": [
+    {
+      "type": "cppbuild",
+      "label": "C/C++: g++ 建置使用中檔案",
+      "command": "/usr/bin/g++",
+      "args": [
+        "-fdiagnostics-color=always",
+        "-g",
+        "${file}", // 編譯的目標檔案
+        "${fileDirname}/src/*.cpp", // src 下所有.cpp
+
+        "-I/opt/spinnaker/include", // Spinnaker API (相機)
+        "-L/opt/spinnaker/lib", // Spinnaker API (相機)
+        "-lSpinnaker", // Spinnaker API (相機)
+
+        "-lopencv_core", // OpenCV
+        "-lopencv_imgcodecs", // OpenCV
+        "-lopencv_imgproc", // OpenCV
+        "-lopencv_highgui", // OpenCV
+        "-I/usr/local/include/opencv4", // OpenCV
+
+        "-I${workspaceFolder}/websocketpp", // websocketpp
+
+        // "${fileDirname}/src/qviewControl.cpp",
+        // "${fileDirname}/src/coordinatePos.cpp",
+        // "${fileDirname}/src/dialog.cpp",
+
+        "-lcurl", // httpRequest ()
+        "-licuuc",
+        "-lmapnik",
+
+        //"-lX11",            // X11/Xlib
+        "-I/usr/include/x86_64-linux-gnu/qt5",
+        "-I/usr/include/x86_64-linux-gnu/qt5/QtCore",
+        "-I/usr/include/x86_64-linux-gnu/qt5/QtWidgets",
+        "-I/usr/include/x86_64-linux-gnu/qt5/QtGui",
+        "-lQt5Widgets",
+        "-lQt5Gui",
+        "-lQt5Core",
+        "-fPIC",
+        "-o",
+        "${fileDirname}/${fileBasenameNoExtension}"
+      ],
+      "options": {
+        "cwd": "${fileDirname}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "偵錯工具產生的工作。"
+    }
+  ],
+  "version": "2.0.0"
+}
