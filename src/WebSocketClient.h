@@ -15,6 +15,7 @@ class WebSocketClient {
     void on_message(connection_hdl, client::message_ptr msg);
     void on_open(connection_hdl hdl);
     void on_close(connection_hdl hdl);
+    void on_fail(connection_hdl hdl);
     void run(const std::string &uri);
     void send_image(const cv::Mat &image);
 

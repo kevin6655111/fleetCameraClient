@@ -12,6 +12,7 @@ WebSocketClient::WebSocketClient(const std::string &vehicleId, const std::string
   c.set_message_handler(std::bind(&WebSocketClient::on_message, this, std::placeholders::_1, std::placeholders::_2));
   c.set_open_handler(std::bind(&WebSocketClient::on_open, this, std::placeholders::_1));
   c.set_close_handler(std::bind(&WebSocketClient::on_close, this, std::placeholders::_1));
+  c.set_fail_handler(std::bind(&WebSocketClient::on_fail, this, std::placeholders::_1));
 }
 
 void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
@@ -21,14 +22,15 @@ void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
 void WebSocketClient::on_open(connection_hdl hdl) {
   connection = hdl;
   open = true;
-
-  std::string authMessage = "{\"vehicleId\":\"" + vehicleId + "\",\"token\":\"" + token + "\"}";
-  c.send(connection, authMessage, websocketpp::frame::opcode::text);
-  std::cout << "Sent auth message: " << authMessage << std::endl;
 }
 
 void WebSocketClient::on_close(connection_hdl hdl) {
   open = false;
+}
+
+void WebSocketClient::on_fail(connection_hdl hdl) {
+  open = false;
+  std::cout << "Connection failed..." << std::endl;
 }
 
 void WebSocketClient::run(const std::string &uri) {
