@@ -18,13 +18,15 @@ class WebSocketClient {
     void on_fail(connection_hdl hdl);
     void run(const std::string &uri);
     void send_image(const cv::Mat &image);
+    bool isStreaming() const { return start_streaming; }
 
   private:
+    std::string vehicleId;
+    std::string token;
     client c;
     connection_hdl connection;
     bool open = false;
-    std::string vehicleId;
-    std::string token;
+    bool start_streaming = false; 
 };
 
 #endif // WEBSOCKETCLIENT_H

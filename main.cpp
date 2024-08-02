@@ -23,8 +23,8 @@ void setNodeValue(CIntegerPtr nodePtr, int value, const string &nodeName) {
 }
 
 int main(int argc, char **argv) {
-    string vehicleId = "BUG-0604"; // 車牌號碼
-    string token = "yJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJqdWFodWEiLCJ1c2VybmFtZSI6Imp1YWh1YSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3MDQ5NTg1NDB9._LwnFsdTMOKzE0F2mIMiYPb6NJusLNXIzUjvktTHyjY"; // 金鑰
+    string vehicleId = "RDJ-1770"; // 車牌號碼
+    string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJqdWFodWEiLCJ1c2VybmFtZSI6Imp1YWh1YSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3MDQ5NTg1NDB9._LwnFsdTMOKzE0F2mIMiYPb6NJusLNXIzUjvktTHyjY"; // 金鑰
 
     int cameraWidth = 2300; // 相機解析度
     int cameraHeight = 1800;
@@ -35,7 +35,7 @@ int main(int argc, char **argv) {
     WebSocketClient ws_client(vehicleId, token);
 
     thread client_thread([&]() {
-        ws_client.run("ws://localhost:3002/AIVehicles?Id=" + vehicleId + "&Token=" + token);
+        ws_client.run("ws://localhost:3002/AIVehicles?Type=post&Id=" + vehicleId + "&Token=" + token);
     });
 
     QApplication app(argc, argv);

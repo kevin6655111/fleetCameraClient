@@ -6,8 +6,8 @@ WebSocketClient::WebSocketClient(const std::string &vehicleId, const std::string
   c.init_asio();
 
   // Disable logging
-  c.clear_access_channels(websocketpp::log::alevel::frame_payload);
-  c.clear_access_channels(websocketpp::log::alevel::frame_header);
+  // c.clear_access_channels(websocketpp::log::alevel::frame_payload);
+  // c.clear_access_channels(websocketpp::log::alevel::frame_header);
 
   c.set_message_handler(std::bind(&WebSocketClient::on_message, this, std::placeholders::_1, std::placeholders::_2));
   c.set_open_handler(std::bind(&WebSocketClient::on_open, this, std::placeholders::_1));
@@ -16,16 +16,25 @@ WebSocketClient::WebSocketClient(const std::string &vehicleId, const std::string
 }
 
 void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
-  std::cout << "Received message: " << msg->get_payload() << std::endl;
+  std::string payload = msg->get_payload();
+
+  std::cout << "Received message: " << payload << std::endl;
+
+  if (payload == "START_STREAM") {
+    std::cout << "Start streaming..." << std::endl;
+    start_streaming = true;
+  }
 }
 
 void WebSocketClient::on_open(connection_hdl hdl) {
   connection = hdl;
   open = true;
+  std::cout << "Connection opened..." << std::endl;
 }
 
 void WebSocketClient::on_close(connection_hdl hdl) {
   open = false;
+  std::cout << "Connection closed..." << std::endl;
 }
 
 void WebSocketClient::on_fail(connection_hdl hdl) {
@@ -47,7 +56,7 @@ void WebSocketClient::run(const std::string &uri) {
 }
 
 void WebSocketClient::send_image(const cv::Mat &image) {
-  if (open) {
+  if (open && start_streaming) {
     std::vector<uchar> buf;
     cv::imencode(".jpg", image, buf);
     std::string payload(buf.begin(), buf.end());
