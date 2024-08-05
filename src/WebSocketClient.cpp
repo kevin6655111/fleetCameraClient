@@ -27,37 +27,47 @@ void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
 void WebSocketClient::on_open(connection_hdl hdl) {
   connection = hdl;
   open = true;
+  should_reconnect = false;
   std::cout << "Connection opened..." << std::endl;
 }
 
 void WebSocketClient::on_close(connection_hdl hdl) {
   open = false;
+  should_reconnect = true;
   std::cout << "Connection closed..." << std::endl;
-  reconnect();
 }
 
 void WebSocketClient::on_fail(connection_hdl hdl) {
   open = false;
+  should_reconnect = true;
   std::cout << "Connection failed..." << std::endl;
-  reconnect();
 }
 
 void WebSocketClient::reconnect() {
+  std::cout << "Reconnecting in " << timeout << " seconds..." << std::endl;
   std::this_thread::sleep_for(std::chrono::seconds(timeout));
-  run();
 }
 
 void WebSocketClient::run() {
-  websocketpp::lib::error_code ec;
-  client::connection_ptr conn = c.get_connection(wsUri, ec);
+  while (true) {
+    if (!open && should_reconnect) {
+      reconnect();
+      should_reconnect = false;
 
-  if (ec) {
-    std::cout << "Could not create connection: " << ec.message() << std::endl;
-    return;
+      websocketpp::lib::error_code ec;
+      client::connection_ptr conn = c.get_connection(wsUri, ec);
+
+      if (ec) {
+        std::cout << "Could not create connection: " << ec.message() << std::endl;
+        should_reconnect = true;
+      } else {
+        c.connect(conn);
+        c.run_one();
+      }
+    } else {
+      c.run_one();
+    }
   }
-
-  c.connect(conn);
-  c.run();
 }
 
 void WebSocketClient::send_image(const cv::Mat &image) {

@@ -28,6 +28,7 @@ class WebSocketClient {
     client c;
     connection_hdl connection;
     bool open = false;
+    bool should_reconnect = false;
     bool start_streaming = false; 
 };
 
