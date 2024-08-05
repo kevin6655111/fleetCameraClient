@@ -8,6 +8,7 @@
 #include <QScreen>
 #include "src/WebSocketClient.h"
 #include <thread>
+#include <cstdlib> 
 
 using namespace Spinnaker;
 using namespace Spinnaker::GenApi;

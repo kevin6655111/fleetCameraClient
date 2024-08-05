@@ -13,6 +13,8 @@ WebSocketClient::WebSocketClient(const std::string &uri, int timeout) : wsUri(ur
   c.set_open_handler(std::bind(&WebSocketClient::on_open, this, std::placeholders::_1));
   c.set_close_handler(std::bind(&WebSocketClient::on_close, this, std::placeholders::_1));
   c.set_fail_handler(std::bind(&WebSocketClient::on_fail, this, std::placeholders::_1));
+
+  connect();
 }
 
 void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
@@ -48,25 +50,27 @@ void WebSocketClient::reconnect() {
   std::this_thread::sleep_for(std::chrono::seconds(timeout));
 }
 
+void WebSocketClient::connect() {
+  websocketpp::lib::error_code ec;
+  client::connection_ptr conn = c.get_connection(wsUri, ec);
+
+  if (ec) {
+    std::cout << "Could not create connection: " << ec.message() << std::endl;
+    should_reconnect = true;
+  } else {
+    c.connect(conn);
+  }
+}
+
 void WebSocketClient::run() {
   while (true) {
     if (!open && should_reconnect) {
       reconnect();
       should_reconnect = false;
-
-      websocketpp::lib::error_code ec;
-      client::connection_ptr conn = c.get_connection(wsUri, ec);
-
-      if (ec) {
-        std::cout << "Could not create connection: " << ec.message() << std::endl;
-        should_reconnect = true;
-      } else {
-        c.connect(conn);
-        c.run_one();
-      }
-    } else {
-      c.run_one();
+      connect();
     }
+
+    c.run_one();
   }
 }
 

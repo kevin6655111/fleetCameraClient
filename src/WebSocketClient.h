@@ -21,6 +21,7 @@ class WebSocketClient {
     bool isStreaming() const { return start_streaming; }
 
   private:
+    void connect();
     void reconnect();
 
     std::string wsUri;
