@@ -23,6 +23,9 @@ void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
   if (payload == "START_STREAM") {
     std::cout << "Start streaming..." << std::endl;
     start_streaming = true;
+  } else if (payload == "STOP_STREAM") {
+    std::cout << "Stop streaming..." << std::endl;
+    start_streaming = false; 
   }
 }
 

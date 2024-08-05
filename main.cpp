@@ -26,7 +26,7 @@ void setNodeValue(CIntegerPtr nodePtr, int value, const string &nodeName) {
 int main(int argc, char **argv) {
     string vehicleId = "RDJ-1770"; // 車牌號碼
     string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJqdWFodWEiLCJ1c2VybmFtZSI6Imp1YWh1YSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3MDQ5NTg1NDB9._LwnFsdTMOKzE0F2mIMiYPb6NJusLNXIzUjvktTHyjY"; // 金鑰
-    string wsUri = "ws://localhost:3002/AIVehicles?type=post&id=" + vehicleId + "&token=" + token;
+    string wsUri = "ws://localhost:3002/fleetMonitor?type=post&id=" + vehicleId + "&token=" + token;
     int wsTimeout = 10; // 超時時間
 
     int cameraWidth = 2300; // 相機解析度
