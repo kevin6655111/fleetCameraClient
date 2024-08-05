@@ -2,12 +2,12 @@
 #include <iostream>
 #include <string>
 
-WebSocketClient::WebSocketClient(const std::string &vehicleId, const std::string &token) : vehicleId(vehicleId), token(token) {
+WebSocketClient::WebSocketClient(const std::string &uri) : wsUri(uri) {
   c.init_asio();
 
   // Disable logging
-  // c.clear_access_channels(websocketpp::log::alevel::frame_payload);
-  // c.clear_access_channels(websocketpp::log::alevel::frame_header);
+  c.clear_access_channels(websocketpp::log::alevel::frame_payload);
+  c.clear_access_channels(websocketpp::log::alevel::frame_header);
 
   c.set_message_handler(std::bind(&WebSocketClient::on_message, this, std::placeholders::_1, std::placeholders::_2));
   c.set_open_handler(std::bind(&WebSocketClient::on_open, this, std::placeholders::_1));
@@ -17,8 +17,6 @@ WebSocketClient::WebSocketClient(const std::string &vehicleId, const std::string
 
 void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
   std::string payload = msg->get_payload();
-
-  std::cout << "Received message: " << payload << std::endl;
 
   if (payload == "START_STREAM") {
     std::cout << "Start streaming..." << std::endl;
@@ -35,16 +33,23 @@ void WebSocketClient::on_open(connection_hdl hdl) {
 void WebSocketClient::on_close(connection_hdl hdl) {
   open = false;
   std::cout << "Connection closed..." << std::endl;
+  reconnect();
 }
 
 void WebSocketClient::on_fail(connection_hdl hdl) {
   open = false;
   std::cout << "Connection failed..." << std::endl;
+  reconnect();
 }
 
-void WebSocketClient::run(const std::string &uri) {
+void WebSocketClient::reconnect() {
+  std::this_thread::sleep_for(std::chrono::seconds(10));
+  run();
+}
+
+void WebSocketClient::run() {
   websocketpp::lib::error_code ec;
-  client::connection_ptr conn = c.get_connection(uri, ec);
+  client::connection_ptr conn = c.get_connection(wsUri, ec);
 
   if (ec) {
     std::cout << "Could not create connection: " << ec.message() << std::endl;
@@ -57,9 +62,13 @@ void WebSocketClient::run(const std::string &uri) {
 
 void WebSocketClient::send_image(const cv::Mat &image) {
   if (open && start_streaming) {
-    std::vector<uchar> buf;
-    cv::imencode(".jpg", image, buf);
-    std::string payload(buf.begin(), buf.end());
-    c.send(connection, payload, websocketpp::frame::opcode::binary);
+    try {
+      std::vector<uchar> buf;
+      cv::imencode(".jpg", image, buf);
+      std::string payload(buf.begin(), buf.end());
+      c.send(connection, payload, websocketpp::frame::opcode::binary);
+    } catch (const std::exception &e) {
+      std::cerr << "Error sending image: " << e.what() << std::endl;    
+    }
   }
 }

@@ -11,18 +11,19 @@ typedef websocketpp::client<websocketpp::config::asio_client> client;
 
 class WebSocketClient {
   public:
-    WebSocketClient(const std::string &vehicleId, const std::string &token);
+    WebSocketClient(const std::string &uri);
     void on_message(connection_hdl, client::message_ptr msg);
     void on_open(connection_hdl hdl);
     void on_close(connection_hdl hdl);
     void on_fail(connection_hdl hdl);
-    void run(const std::string &uri);
+    void run();
     void send_image(const cv::Mat &image);
     bool isStreaming() const { return start_streaming; }
 
   private:
-    std::string vehicleId;
-    std::string token;
+    void reconnect();
+
+    std::string wsUri;
     client c;
     connection_hdl connection;
     bool open = false;
