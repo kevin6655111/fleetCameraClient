@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-WebSocketClient::WebSocketClient(const std::string &uri, int timeout) : wsUri(uri), timeout(timeout) {
+WebSocketClient::WebSocketClient(const std::string &uri, int timeout) : uri(uri), timeout(timeout) {
   c.init_asio();
 
   // Disable logging
@@ -52,7 +52,7 @@ void WebSocketClient::reconnect() {
 
 void WebSocketClient::connect() {
   websocketpp::lib::error_code ec;
-  client::connection_ptr conn = c.get_connection(wsUri, ec);
+  client::connection_ptr conn = c.get_connection(uri, ec);
 
   if (ec) {
     std::cout << "Could not create connection: " << ec.message() << std::endl;

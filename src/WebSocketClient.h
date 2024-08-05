@@ -24,7 +24,7 @@ class WebSocketClient {
     void connect();
     void reconnect();
 
-    std::string wsUri;
+    std::string uri;
     int timeout;
     client c;
     connection_hdl connection;
