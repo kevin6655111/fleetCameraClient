@@ -11,7 +11,7 @@ typedef websocketpp::client<websocketpp::config::asio_client> client;
 
 class WebSocketClient {
   public:
-    WebSocketClient(const std::string &uri);
+    WebSocketClient(const std::string &uri, int timeout);
     void on_message(connection_hdl, client::message_ptr msg);
     void on_open(connection_hdl hdl);
     void on_close(connection_hdl hdl);
@@ -24,6 +24,7 @@ class WebSocketClient {
     void reconnect();
 
     std::string wsUri;
+    int timeout;
     client c;
     connection_hdl connection;
     bool open = false;

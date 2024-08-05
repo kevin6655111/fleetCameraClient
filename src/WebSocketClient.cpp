@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-WebSocketClient::WebSocketClient(const std::string &uri) : wsUri(uri) {
+WebSocketClient::WebSocketClient(const std::string &uri, int timeout) : wsUri(uri), timeout(timeout) {
   c.init_asio();
 
   // Disable logging
@@ -43,7 +43,7 @@ void WebSocketClient::on_fail(connection_hdl hdl) {
 }
 
 void WebSocketClient::reconnect() {
-  std::this_thread::sleep_for(std::chrono::seconds(10));
+  std::this_thread::sleep_for(std::chrono::seconds(timeout));
   run();
 }
 
