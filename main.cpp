@@ -28,14 +28,16 @@ int main(int argc, char **argv) {
     string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJqdWFodWEiLCJ1c2VybmFtZSI6Imp1YWh1YSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3MDQ5NTg1NDB9._LwnFsdTMOKzE0F2mIMiYPb6NJusLNXIzUjvktTHyjY"; // 金鑰
     string wsUri = "ws://localhost:3002/fleetMonitor?type=post&id=" + vehicleId + "&token=" + token;
     int wsTimeout = 10; // 超時時間
+    int initialUploadInterval = 100; // 初始上傳間隔時間
+    int maxUploadInterval = 1000; // 最大上傳間隔時間
 
-    int cameraWidth = 2300; // 相機解析度
-    int cameraHeight = 1800;
+    int cameraWidth = 2000; // 相機解析度
+    int cameraHeight = 1500;
     
     int windowWidth = 800; 
     int windowHeight = 600;
 
-    WebSocketClient ws_client(wsUri, wsTimeout);
+    WebSocketClient ws_client(wsUri, wsTimeout, initialUploadInterval, maxUploadInterval);
     thread client_thread([&]() {
         ws_client.run();
     });
@@ -79,15 +81,6 @@ int main(int argc, char **argv) {
 
         setNodeValue(widthPtr, cameraWidth, "Width");
         setNodeValue(heightPtr, cameraHeight, "Height");
-
-        // Set the camera frame rate
-        CFloatPtr frameRatePtr = nodeMap.GetNode("AcquisitionFrameRate");
-        if (IsAvailable(frameRatePtr) && IsWritable(frameRatePtr)) {
-            frameRatePtr->SetValue(15.0); // 相機幀率
-            cout << "Frame rate set to " << frameRatePtr->GetValue() << endl;
-        } else {
-            cout << "Frame rate not available or not writable..." << endl;
-        }
 
         // Begin acquiring images
         pCam->BeginAcquisition();
