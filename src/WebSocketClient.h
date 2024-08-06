@@ -19,19 +19,18 @@ class WebSocketClient {
     void on_fail(connection_hdl hdl);
     void on_message(connection_hdl, client::message_ptr msg);
     void on_pong(connection_hdl hdl, std::string payload);
-
+    void adjustUploadInterval();
     void run();
     void send_ping();
     void send_image(const cv::Mat &image);
     bool isStreaming() const { return start_streaming; }
 
   private:
-
-
     std::string uri;
     int timeout = 30;
     int uploadInterval = 100;
     int maxUploadInterval = 1000;
+    int rtt = 0;  // Round-Trip Time
 
     client c;
     connection_hdl connection;
