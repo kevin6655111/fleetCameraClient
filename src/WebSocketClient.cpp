@@ -71,12 +71,14 @@ void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
 }
 
 void WebSocketClient::adjustUploadInterval() {
-  if (rtt > 200) {
+  const int increaseThreshold = 200;
+
+  if (rtt > increaseThreshold) {
     // High RTT, increase upload interval
-    uploadInterval = std::min(uploadInterval + 100, maxUploadInterval);
+    uploadInterval = std::min(uploadInterval + 50, maxUploadInterval);
   } else {
     // Low RTT, decrease upload interval
-    uploadInterval = std::max(uploadInterval - 100, 100);
+    uploadInterval = std::max(uploadInterval - 50, 100);
   }
 }
 
@@ -85,10 +87,10 @@ void WebSocketClient::on_pong(connection_hdl hdl, std::string msg) {
   auto rtt_duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_ping_time).count();
   rtt = static_cast<int>(rtt_duration);
 
-  std::cout << "Received pong: " << msg << ", RTT: " << rtt << " ms" << std::endl;
   last_ping_time = now;
 
   adjustUploadInterval();
+  std::cout << "RTT: " << rtt << " ms" << ", uploadInterval: " << uploadInterval << std::endl;
 }
 
 void WebSocketClient::send_ping() {
@@ -115,9 +117,7 @@ void WebSocketClient::run() {
 
     send_ping(); // 定時發送 ping
     c.poll_one(); // 處理現有的事件
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-    std::cout << "uploadInterval: " << uploadInterval << std::endl;
+    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 休眠 10 毫秒
   }
 }
 
@@ -128,6 +128,7 @@ void WebSocketClient::send_image(const cv::Mat &image) {
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_upload).count();
 
     if (duration < uploadInterval) return;
+
     last_upload = now;
 
     try {

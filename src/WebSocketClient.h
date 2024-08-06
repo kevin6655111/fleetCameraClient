@@ -40,8 +40,7 @@ class WebSocketClient {
 
     std::chrono::steady_clock::time_point last_upload;
     std::chrono::steady_clock::time_point last_ping_time;
-    const int pingInterval = 5000; // send ping every 5 seconds
-    std::mutex mutex;
+    const int pingInterval = 30000; // send ping every 30 seconds
 };
 
 #endif // WEBSOCKETCLIENT_H
