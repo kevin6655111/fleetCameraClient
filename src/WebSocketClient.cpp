@@ -133,7 +133,12 @@ void WebSocketClient::send_image(const cv::Mat &image) {
 
     try {
       std::vector<uchar> buf;
-      cv::imencode(".jpg", image, buf);
+
+      std::vector<int> compression_params;
+      compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
+      compression_params.push_back(70);
+      
+      cv::imencode(".jpg", image, buf, compression_params);
       std::string payload(buf.begin(), buf.end());
       c.send(connection, payload, websocketpp::frame::opcode::binary);
     } catch (const std::exception &e) {
