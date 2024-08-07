@@ -11,7 +11,7 @@ typedef websocketpp::client<websocketpp::config::asio_client> client;
 
 class WebSocketClient {
   public:
-    WebSocketClient(const std::string &uri, int timeout, int uploadInterval, int maxUploadInterval);
+    WebSocketClient(const std::string &uri);
     void connect();
     void reconnect();
     void on_open(connection_hdl hdl);
@@ -27,9 +27,9 @@ class WebSocketClient {
 
   private:
     std::string uri;
-    int timeout = 30;
-    int uploadInterval = 100;
-    int maxUploadInterval = 1000;
+    const int timeout = 10; // reconnect timeout is 10 seconds
+    const int maxUploadInterval = 1000; // max upload interval is 1 second
+    int uploadInterval = 100; // initial upload interval is 100 ms
     int rtt = 0;  // Round-Trip Time
 
     client c;

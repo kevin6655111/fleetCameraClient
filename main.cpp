@@ -27,9 +27,6 @@ int main(int argc, char **argv) {
     string vehicleId = "RDJ-1770"; // 車牌號碼
     string token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyaWQiOiJqdWFodWEiLCJ1c2VybmFtZSI6Imp1YWh1YSIsImlzQWRtaW4iOmZhbHNlLCJpYXQiOjE3MDQ5NTg1NDB9._LwnFsdTMOKzE0F2mIMiYPb6NJusLNXIzUjvktTHyjY"; // 金鑰
     string wsUri = "ws://localhost:3002/fleetMonitor?type=post&id=" + vehicleId + "&token=" + token;
-    int wsTimeout = 10; // 超時時間
-    int initialUploadInterval = 100; // 初始上傳間隔時間
-    int maxUploadInterval = 1000; // 最大上傳間隔時間
 
     int cameraWidth = 2000; // 相機解析度
     int cameraHeight = 1500;
@@ -37,7 +34,7 @@ int main(int argc, char **argv) {
     int windowWidth = 800; 
     int windowHeight = 600;
 
-    WebSocketClient ws_client(wsUri, wsTimeout, initialUploadInterval, maxUploadInterval);
+    WebSocketClient ws_client(wsUri);
     thread client_thread([&]() {
         ws_client.run();
     });

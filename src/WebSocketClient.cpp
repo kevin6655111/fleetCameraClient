@@ -2,8 +2,8 @@
 #include <iostream>
 #include <string>
 
-WebSocketClient::WebSocketClient(const std::string &uri, int timeout, int uploadInterval, int maxUploadInterval) 
-  : uri(uri), timeout(timeout), uploadInterval(uploadInterval), maxUploadInterval(maxUploadInterval)  {
+WebSocketClient::WebSocketClient(const std::string &uri) 
+  : uri(uri) {
   c.init_asio();
 
   // Disable logging
@@ -49,6 +49,10 @@ void WebSocketClient::on_open(connection_hdl hdl) {
 void WebSocketClient::on_close(connection_hdl hdl) {
   open = false;
   should_reconnect = true;
+  start_streaming = false;
+  uploadInterval = 100;
+  rtt = 0;
+
   std::cout << "Connection closed..." << std::endl;
 }
 
@@ -137,7 +141,7 @@ void WebSocketClient::send_image(const cv::Mat &image) {
       std::vector<int> compression_params;
       compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
       compression_params.push_back(70);
-      
+
       cv::imencode(".jpg", image, buf, compression_params);
       std::string payload(buf.begin(), buf.end());
       c.send(connection, payload, websocketpp::frame::opcode::binary);
