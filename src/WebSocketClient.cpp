@@ -50,7 +50,8 @@ void WebSocketClient::on_close(connection_hdl hdl) {
   open = false;
   should_reconnect = true;
   start_streaming = false;
-  uploadInterval = 100;
+  serverOverloaded = false;
+  uploadInterval = 50;
   rtt = 0;
 
   std::cout << "Connection closed..." << std::endl;
@@ -74,9 +75,12 @@ void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
   } else if (payload == "SERVER_OVERLOADED") {
     std::cout << "Server is overloaded. Increasing upload interval..." << std::endl;
     serverOverloaded = true;
+    adjustUploadInterval();
   } else if (payload == "SERVER_NOT_OVERLOADED") {
     std::cout << "Server is not overloaded." << std::endl;
     serverOverloaded = false;
+    uploadInterval = 50;
+    adjustUploadInterval();
   }
 }
 
@@ -86,10 +90,10 @@ void WebSocketClient::adjustUploadInterval() {
   } else {
     if (rtt > 200) {
       // High RTT, increase upload interval
-      uploadInterval = std::min(uploadInterval + 100, maxUploadInterval);
+      uploadInterval = std::min(uploadInterval + intervalAdjustment, maxUploadInterval);
     } else {
       // Low RTT, decrease upload interval
-      uploadInterval = std::max(uploadInterval - 100, 100);
+      uploadInterval = std::max(uploadInterval - intervalAdjustment, minUploadInterval);
     }
   }
 }

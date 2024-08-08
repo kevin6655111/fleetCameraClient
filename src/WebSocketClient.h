@@ -31,11 +31,13 @@ class WebSocketClient {
     bool should_reconnect = false; // reconnect flag
     bool start_streaming = false; // streaming flag
     bool serverOverloaded = false; // server overloaded flag
-    int uploadInterval = 100; // streaming initial upload interval is 100ms
-    const int maxUploadInterval = 1000; // max upload interval is 1s
-    const int timeout = 10; // reconnect timeout is 10s
+    int uploadInterval = 50; // streaming initial upload interval is 100ms
     int rtt = 0;  // Round-Trip Time
-    const int pingInterval = 30000; // send ping every 30s
+    const int maxUploadInterval = 1000; // max upload interval is 1s
+    const int minUploadInterval = 50; // min upload interval is 50ms
+    const int intervalAdjustment = 50; // upload interval adjustment is 50ms
+    const int timeout = 30; // reconnect timeout is 10s
+    const int pingInterval = 15000; // send ping every 15s
 
     client c;
     connection_hdl connection;
