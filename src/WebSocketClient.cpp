@@ -71,18 +71,26 @@ void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
   } else if (payload == "STOP_STREAM") {
     std::cout << "Stop streaming..." << std::endl;
     start_streaming = false; 
+  } else if (payload == "SERVER_OVERLOADED") {
+    std::cout << "Server is overloaded. Increasing upload interval..." << std::endl;
+    serverOverloaded = true;
+  } else if (payload == "SERVER_NOT_OVERLOADED") {
+    std::cout << "Server is not overloaded." << std::endl;
+    serverOverloaded = false;
   }
 }
 
 void WebSocketClient::adjustUploadInterval() {
-  const int increaseThreshold = 200;
-
-  if (rtt > increaseThreshold) {
-    // High RTT, increase upload interval
-    uploadInterval = std::min(uploadInterval + 50, maxUploadInterval);
+  if (serverOverloaded) {
+    uploadInterval = 500;
   } else {
-    // Low RTT, decrease upload interval
-    uploadInterval = std::max(uploadInterval - 50, 100);
+    if (rtt > 200) {
+      // High RTT, increase upload interval
+      uploadInterval = std::min(uploadInterval + 100, maxUploadInterval);
+    } else {
+      // Low RTT, decrease upload interval
+      uploadInterval = std::max(uploadInterval - 100, 100);
+    }
   }
 }
 

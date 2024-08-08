@@ -27,20 +27,20 @@ class WebSocketClient {
 
   private:
     std::string uri;
-    const int timeout = 10; // reconnect timeout is 10 seconds
-    const int maxUploadInterval = 1000; // max upload interval is 1 second
-    int uploadInterval = 100; // initial upload interval is 100 ms
+    bool open = false; // connection status
+    bool should_reconnect = false; // reconnect flag
+    bool start_streaming = false; // streaming flag
+    bool serverOverloaded = false; // server overloaded flag
+    int uploadInterval = 100; // streaming initial upload interval is 100ms
+    const int maxUploadInterval = 1000; // max upload interval is 1s
+    const int timeout = 10; // reconnect timeout is 10s
     int rtt = 0;  // Round-Trip Time
+    const int pingInterval = 30000; // send ping every 30s
 
     client c;
     connection_hdl connection;
-    bool open = false;
-    bool should_reconnect = false;
-    bool start_streaming = false; 
-
     std::chrono::steady_clock::time_point last_upload;
     std::chrono::steady_clock::time_point last_ping_time;
-    const int pingInterval = 30000; // send ping every 30 seconds
 };
 
 #endif // WEBSOCKETCLIENT_H
