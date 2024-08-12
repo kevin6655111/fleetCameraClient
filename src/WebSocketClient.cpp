@@ -113,22 +113,7 @@ void WebSocketClient::send_ping() {
   }
 }
 
-void WebSocketClient::send_gps() {
-  if (open && last_gps.has_elapsed(2000)) {
-    nlohmann::json jsonData;
-
-    jsonData["TYPE"] = "GPS";
-    jsonData["LAT"] = 25.0330;
-    jsonData["LNG"] = 121.5654;
-
-    std::string payload = jsonData.dump();
-    std::cout << "Sending GPS: " << payload << std::endl;
-  }
-}
-
 void WebSocketClient::send_image(const cv::Mat &image) {
-  auto now = std::chrono::steady_clock::now();
-
   if (open && start_streaming && last_upload.has_elapsed(uploadInterval)) {
     try {
       std::vector<uchar> buf;
@@ -146,6 +131,19 @@ void WebSocketClient::send_image(const cv::Mat &image) {
   }
 }
 
+void WebSocketClient::send_gps(float lat, float lng) {
+  if (open && last_gps.has_elapsed(gpsInterval)) {
+    nlohmann::json jsonData;
+
+    jsonData["TYPE"] = "GPS";
+    jsonData["LAT"] = lat;
+    jsonData["LNG"] = lng;
+
+    std::string payload = jsonData.dump();
+    std::cout << "Sending GPS: " << payload << std::endl;
+  }
+}
+
 void WebSocketClient::run() {
   std::cout << "Running websocket client..." << std::endl;
 
@@ -156,7 +154,6 @@ void WebSocketClient::run() {
     }
 
     send_ping(); // 定時發送 ping
-    send_gps(); // 定時發送 GPS
     c.poll_one(); // 處理現有的事件
     std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 等待 10ms
   }

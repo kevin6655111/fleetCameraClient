@@ -34,6 +34,12 @@ int main(int argc, char **argv) {
     int windowWidth = 800; 
     int windowHeight = 600;
 
+    // TO DO TEST
+    float lat = 25.0330;
+    float lng = 121.5654;
+    float increment = 0.0001;
+
+
     WebSocketClient ws_client(wsUri);
     thread client_thread([&]() {
         ws_client.run();
@@ -103,6 +109,9 @@ int main(int argc, char **argv) {
                 
                 // Create an OpenCV Mat with the data from the image
                 cv::Mat cvImage = cv::Mat(convertedImage->GetHeight(), convertedImage->GetWidth(), CV_8UC3, convertedImage->GetData(), convertedImage->GetStride());
+
+                ws_client.send_gps(lat, lng);
+                lat += increment;
 
                 ws_client.send_image(cvImage);
 

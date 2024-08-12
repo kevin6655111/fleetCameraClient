@@ -23,7 +23,7 @@ class WebSocketClient {
     void adjustUploadInterval();
     void run();
     void send_ping();
-    void send_gps();
+    void send_gps(float lat, float lng);
     void send_image(const cv::Mat &image);
     bool isStreaming() const { return start_streaming; }
 
@@ -35,12 +35,17 @@ class WebSocketClient {
     bool serverOverloaded = false; // server overloaded flag
     int uploadInterval = 50; // streaming initial upload interval is 100ms
     int rtt = 0;  // Round-Trip Time
+
+    const int timeout = 30; // reconnect timeout is 10s
+    const int pingInterval = 15000; // send ping every 15s
+    const int gpsInterval = 1000; // send gps every 1s
+
     const int maxUploadInterval = 1000; // max upload interval is 1s
     const int minUploadInterval = 50; // min upload interval is 50ms
     const int intervalAdjustment = 50; // upload interval adjustment is 50ms
-    const int timeout = 30; // reconnect timeout is 10s
-    const int pingInterval = 15000; // send ping every 15s
-    const int imageQuality = 70; // image quality 
+    const int imageQuality = 70; // image quality
+
+
 
     client c;
     connection_hdl connection;
