@@ -4,6 +4,7 @@
 #include <opencv2/opencv.hpp>
 #include <websocketpp/config/asio_no_tls_client.hpp>
 #include <websocketpp/client.hpp>
+#include <Timer.h>
 
 using websocketpp::connection_hdl;
 
@@ -22,6 +23,7 @@ class WebSocketClient {
     void adjustUploadInterval();
     void run();
     void send_ping();
+    void send_gps();
     void send_image(const cv::Mat &image);
     bool isStreaming() const { return start_streaming; }
 
@@ -38,11 +40,13 @@ class WebSocketClient {
     const int intervalAdjustment = 50; // upload interval adjustment is 50ms
     const int timeout = 30; // reconnect timeout is 10s
     const int pingInterval = 15000; // send ping every 15s
+    const int imageQuality = 70; // image quality 
 
     client c;
     connection_hdl connection;
-    std::chrono::steady_clock::time_point last_upload;
-    std::chrono::steady_clock::time_point last_ping_time;
+    Timer last_upload;
+    Timer last_ping_time;
+    Timer last_gps;
 };
 
 #endif // WEBSOCKETCLIENT_H

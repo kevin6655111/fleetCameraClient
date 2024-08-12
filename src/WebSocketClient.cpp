@@ -1,6 +1,7 @@
 #include "WebSocketClient.h"
 #include <iostream>
 #include <string>
+#include <nlohmann/json.hpp>
 
 WebSocketClient::WebSocketClient(const std::string &uri) 
   : uri(uri) {
@@ -17,8 +18,6 @@ WebSocketClient::WebSocketClient(const std::string &uri)
   c.set_pong_handler(std::bind(&WebSocketClient::on_pong, this, std::placeholders::_1, std::placeholders::_2));
 
   connect();
-  last_upload = std::chrono::steady_clock::now();
-  last_ping_time = std::chrono::steady_clock::now();
 }
 
 void WebSocketClient::connect() {
@@ -98,26 +97,51 @@ void WebSocketClient::adjustUploadInterval() {
   }
 }
 
-void WebSocketClient::on_pong(connection_hdl hdl, std::string msg) {
-  auto now = std::chrono::steady_clock::now();
-  auto rtt_duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_ping_time).count();
-  rtt = static_cast<int>(rtt_duration);
-
-  last_ping_time = now;
+void WebSocketClient::on_pong(connection_hdl hdl, std::string msg) {  
+  auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - last_ping_time.get_last_time()).count();
+  rtt = static_cast<int>(duration);
+  last_ping_time.reset();
 
   adjustUploadInterval();
   std::cout << "RTT: " << rtt << " ms" << ", uploadInterval: " << uploadInterval << std::endl;
 }
 
 void WebSocketClient::send_ping() {
-  if (open) {
-    auto now = std::chrono::steady_clock::now();
-    auto ping_duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_ping_time).count();
+  if (open && last_ping_time.has_elapsed(pingInterval)) {
+    std::cout << "Sending ping..." << std::endl;
+    c.ping(connection, "ping");
+  }
+}
 
-    if (ping_duration >= pingInterval) {
-      std::cout << "Sending ping..." << std::endl;
-      c.ping(connection, "ping");
-      last_ping_time = now;
+void WebSocketClient::send_gps() {
+  if (open && last_gps.has_elapsed(2000)) {
+    nlohmann::json jsonData;
+
+    jsonData["TYPE"] = "GPS";
+    jsonData["LAT"] = 25.0330;
+    jsonData["LNG"] = 121.5654;
+
+    std::string payload = jsonData.dump();
+    std::cout << "Sending GPS: " << payload << std::endl;
+  }
+}
+
+void WebSocketClient::send_image(const cv::Mat &image) {
+  auto now = std::chrono::steady_clock::now();
+
+  if (open && start_streaming && last_upload.has_elapsed(uploadInterval)) {
+    try {
+      std::vector<uchar> buf;
+
+      std::vector<int> compression_params;
+      compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
+      compression_params.push_back(imageQuality);
+
+      cv::imencode(".jpg", image, buf, compression_params);
+      std::string payload(buf.begin(), buf.end());
+      c.send(connection, payload, websocketpp::frame::opcode::binary);
+    } catch (const std::exception &e) {
+      std::cerr << "Error sending image: " << e.what() << std::endl;    
     }
   }
 }
@@ -132,33 +156,8 @@ void WebSocketClient::run() {
     }
 
     send_ping(); // 定時發送 ping
+    send_gps(); // 定時發送 GPS
     c.poll_one(); // 處理現有的事件
-    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 休眠 10 毫秒
-  }
-}
-
-void WebSocketClient::send_image(const cv::Mat &image) {
-  auto now = std::chrono::steady_clock::now();
-
-  if (open && start_streaming) {
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_upload).count();
-
-    if (duration < uploadInterval) return;
-
-    last_upload = now;
-
-    try {
-      std::vector<uchar> buf;
-
-      std::vector<int> compression_params;
-      compression_params.push_back(cv::IMWRITE_JPEG_QUALITY);
-      compression_params.push_back(70);
-
-      cv::imencode(".jpg", image, buf, compression_params);
-      std::string payload(buf.begin(), buf.end());
-      c.send(connection, payload, websocketpp::frame::opcode::binary);
-    } catch (const std::exception &e) {
-      std::cerr << "Error sending image: " << e.what() << std::endl;    
-    }
+    std::this_thread::sleep_for(std::chrono::milliseconds(10)); // 等待 10ms
   }
 }
