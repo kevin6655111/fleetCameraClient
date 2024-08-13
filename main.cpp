@@ -112,7 +112,6 @@ int main(int argc, char **argv) {
 
                 ws_client.send_gps(lat, lng);
                 lat += increment;
-
                 ws_client.send_image(cvImage);
 
                 // Display the image

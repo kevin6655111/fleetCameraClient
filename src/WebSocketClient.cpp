@@ -64,22 +64,25 @@ void WebSocketClient::on_fail(connection_hdl hdl) {
 
 void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
   std::string payload = msg->get_payload();
+  nlohmann::json jsonMsg;
 
-  if (payload == "START_STREAM") {
-    std::cout << "Start streaming..." << std::endl;
-    start_streaming = true;
-  } else if (payload == "STOP_STREAM") {
-    std::cout << "Stop streaming..." << std::endl;
-    start_streaming = false; 
-  } else if (payload == "SERVER_OVERLOADED") {
-    std::cout << "Server is overloaded. Increasing upload interval..." << std::endl;
-    serverOverloaded = true;
-    adjustUploadInterval();
-  } else if (payload == "SERVER_NOT_OVERLOADED") {
-    std::cout << "Server is not overloaded." << std::endl;
-    serverOverloaded = false;
-    uploadInterval = 50;
-    adjustUploadInterval();
+  try {
+    jsonMsg = nlohmann::json::parse(payload);
+    std::string command = jsonMsg["COMMAND"];
+    std::string action = jsonMsg["ACTION"];
+
+    if (command == "STREAMING") {
+      start_streaming = (action == "START");
+      std::cout << (start_streaming ? "Start" : "Stop") << " streaming..." << std::endl;
+    } else if (command == "SERVER") {
+      serverOverloaded = (action == "OVERLOADED");
+      std::cout << "Server is " << (serverOverloaded ? "overloaded" : "not overloaded") << std::endl;
+
+      if (!serverOverloaded) uploadInterval = 50;
+      adjustUploadInterval();
+    } 
+  } catch (nlohmann::json::exception &e) {
+    std::cout << "JSON error: " << e.what() << std::endl;
   }
 }
 
@@ -141,6 +144,7 @@ void WebSocketClient::send_gps(float lat, float lng) {
 
     std::string payload = jsonData.dump();
     std::cout << "Sending GPS: " << payload << std::endl;
+    c.send(connection, payload, websocketpp::frame::opcode::text);
   }
 }
 

@@ -38,7 +38,7 @@ class WebSocketClient {
 
     const int timeout = 30; // reconnect timeout is 10s
     const int pingInterval = 15000; // send ping every 15s
-    const int gpsInterval = 1000; // send gps every 1s
+    const int gpsInterval = 5000; // send gps every 1s
 
     const int maxUploadInterval = 1000; // max upload interval is 1s
     const int minUploadInterval = 50; // min upload interval is 50ms
