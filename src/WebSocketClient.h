@@ -24,8 +24,9 @@ class WebSocketClient {
     void run();
     void send_ping();
     void send_gps(float lat, float lng);
-    void send_image(const cv::Mat &image);
+    void streaming(const cv::Mat &image);
     bool isStreaming() const { return start_streaming; }
+    void send_image(const cv::Mat &image);
 
   private:
     std::string uri;

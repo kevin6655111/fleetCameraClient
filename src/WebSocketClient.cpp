@@ -66,12 +66,20 @@ void WebSocketClient::on_message(connection_hdl hdl, client::message_ptr msg) {
   std::string payload = msg->get_payload();
   nlohmann::json jsonMsg;
 
+  if (payload.empty() || (payload.front() != '{' && payload.front() != '[')) {
+    std::cout << "Received message: " << payload << std::endl;
+    return;
+  }
+
   try {
     jsonMsg = nlohmann::json::parse(payload);
+
+    std::cout << "Received message: " << jsonMsg.dump() << std::endl;
+
     std::string command = jsonMsg["COMMAND"];
     std::string action = jsonMsg["ACTION"];
 
-    if (command == "STREAMING") {
+    if (command == "CTRL_STREAMING") {
       start_streaming = (action == "START");
       std::cout << (start_streaming ? "Start" : "Stop") << " streaming..." << std::endl;
     } else if (command == "SERVER") {
@@ -116,7 +124,7 @@ void WebSocketClient::send_ping() {
   }
 }
 
-void WebSocketClient::send_image(const cv::Mat &image) {
+void WebSocketClient::streaming(const cv::Mat &image) {
   if (open && start_streaming && last_upload.has_elapsed(uploadInterval)) {
     try {
       std::vector<uchar> buf;
@@ -129,8 +137,22 @@ void WebSocketClient::send_image(const cv::Mat &image) {
       std::string payload(buf.begin(), buf.end());
       c.send(connection, payload, websocketpp::frame::opcode::binary);
     } catch (const std::exception &e) {
-      std::cerr << "Error sending image: " << e.what() << std::endl;    
+      std::cerr << "Error streaming: " << e.what() << std::endl;    
     }
+  }
+}
+
+void WebSocketClient::send_image(const cv::Mat &image) {
+  try {
+    size_t image_data_size = image.total() * image.elemSize();
+
+    std::string payload(reinterpret_cast<const char*>(image.data), image_data_size);
+
+    c.send(connection, payload, websocketpp::frame::opcode::binary);
+
+    std::cout << "Raw image data sent successfully." << std::endl;
+  } catch (const std::exception &e) {
+    std::cerr << "Error sending image: " << e.what() << std::endl;
   }
 }
 
@@ -138,7 +160,7 @@ void WebSocketClient::send_gps(float lat, float lng) {
   if (open && last_gps.has_elapsed(gpsInterval)) {
     nlohmann::json jsonData;
 
-    jsonData["TYPE"] = "GPS";
+    jsonData["COMMAND"] = "GPS";
     jsonData["LAT"] = lat;
     jsonData["LNG"] = lng;
 
